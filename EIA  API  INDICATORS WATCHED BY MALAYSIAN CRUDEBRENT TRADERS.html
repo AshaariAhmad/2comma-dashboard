@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EIA + API — Indicators Used by Malaysian Crude/Brent Traders</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#050505; --bg2:#0a0a0a; --bg3:#111; --border:#1e1e1e;
+    --orange:#ff6600; --amber:#ffaa00; --cyan:#00d4ff;
+    --green:#00ff88; --red:#ff3355; --purple:#aa66ff;
+    --white:#e8e8e8; --muted:#444;
+    --mono:'Share Tech Mono',monospace;
+    --display:'Orbitron',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--white);font-family:var(--mono);font-size:11px;padding:24px;min-height:100vh}
+
+  .header{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--orange);padding-bottom:12px;margin-bottom:20px}
+  .logo{font-family:var(--display);font-size:18px;color:var(--orange);letter-spacing:3px}
+  .logo span{color:var(--amber)}
+  .header-meta{margin-left:auto;text-align:right;color:var(--muted);font-size:10px;line-height:1.6}
+  .header-meta strong{color:var(--cyan)}
+
+  .section-label{font-family:var(--display);font-size:9px;letter-spacing:2px;color:var(--orange);
+    border-left:2px solid var(--orange);padding-left:8px;margin:24px 0 10px}
+
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:2px}
+  table{width:100%;border-collapse:collapse;font-size:10.5px}
+  thead tr{background:var(--bg3);border-bottom:1px solid var(--orange)}
+  thead th{padding:8px 10px;text-align:left;font-family:var(--display);font-size:8px;
+    letter-spacing:1.5px;color:var(--orange);white-space:nowrap;border-right:1px solid var(--border)}
+  thead th:last-child{border-right:none}
+  tbody tr{border-bottom:1px solid var(--border)}
+  tbody tr:hover{background:rgba(255,102,0,0.04)}
+  tbody tr:last-child{border-bottom:none}
+  td{padding:7px 10px;vertical-align:top;border-right:1px solid var(--border);line-height:1.55}
+  td:last-child{border-right:none}
+
+  .num{color:var(--muted);text-align:center;width:30px}
+  .col-name{color:var(--amber);font-weight:bold}
+  .why{color:var(--green)}
+  .freq{color:var(--cyan);font-size:9.5px;white-space:nowrap}
+  .endpoint{color:var(--white);font-size:9.5px;word-break:break-all}
+  .id{color:var(--purple);font-weight:bold}
+
+  .badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:8px;
+    font-family:var(--display);letter-spacing:0.8px}
+  .badge-eia{background:rgba(0,255,136,0.12);color:var(--green);border:1px solid rgba(0,255,136,0.3)}
+  .badge-api{background:rgba(255,170,0,0.10);color:var(--amber);border:1px solid rgba(255,170,0,0.3)}
+  .badge-px {background:rgba(0,212,255,0.10);color:var(--cyan);border:1px solid rgba(0,212,255,0.3)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+  .chip{padding:4px 10px;border:1px solid var(--border);font-size:9px;color:var(--muted);letter-spacing:0.5px}
+  .chip span{color:var(--amber);font-weight:bold}
+
+  .footer{margin-top:28px;padding-top:10px;border-top:1px solid var(--border);
+    color:var(--muted);font-size:9px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .footer strong{color:var(--orange)}
+
+  pre{background:#000;border:1px solid var(--border);padding:8px;font-size:9.5px;
+    color:var(--cyan);overflow-x:auto;white-space:pre-wrap;word-break:break-all;margin-top:4px}
+  code{color:var(--amber)}
+
+  body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(
+    to bottom,transparent 0px,transparent 2px,rgba(0,0,0,0.04) 2px,rgba(0,0,0,0.04) 4px);
+    pointer-events:none;z-index:9999}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">◆ KL <span>OIL DESK</span></div>
+  <div class="header-meta">
+    <strong>EIA + API — INDICATORS WATCHED BY MALAYSIAN CRUDE/BRENT TRADERS</strong><br>
+    Source: EIA WPSR (Wed 10:30 ET / Thu 11:30 KL) &nbsp;·&nbsp; API WSB (Tue 4:30 PM ET / Wed 5:30 AM KL)<br>
+    Compiled: <strong>2026-04-27</strong>
+  </div>
+</div>
+
+<div class="chips">
+  <div class="chip">EIA INDICATORS <span>11</span></div>
+  <div class="chip">API INDICATORS <span>6</span></div>
+  <div class="chip">PRICE BENCHMARKS <span>4</span></div>
+  <div class="chip">RELEASE LAG <span>API → EIA = 18h</span></div>
+  <div class="chip">KL TRADING IMPACT <span>Thu morning 09:30 MYT</span></div>
+</div>
+
+<!-- ═══════════════════════════ EIA ═══════════════════════════ -->
+<div class="section-label">◈ EIA — WEEKLY PETROLEUM STATUS REPORT (free, public API v2)</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>COLUMN / INDICATOR</th>
+      <th>SERIES ID</th>
+      <th>UNIT</th>
+      <th>FREQ / RELEASE</th>
+      <th>WHY MALAYSIAN TRADERS WATCH IT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="num">1</td>
+        <td class="col-name">Commercial Crude Stocks (ex-SPR)</td>
+        <td class="id">WCESTUS1</td>
+        <td>kbbl</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">The headline number. Build = bearish Brent/WTI, draw = bullish. First moves Asia open Thu 09:30 MYT</td></tr>
+
+    <tr><td class="num">2</td>
+        <td class="col-name">Cushing OK Crude Stocks</td>
+        <td class="id">W_EPC0_SAX_YCUOK_MBBL</td>
+        <td>kbbl</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">WTI delivery hub. Drives Brent–WTI spread that Asian refiners use to source crude (Tapis, Murban vs WTI)</td></tr>
+
+    <tr><td class="num">3</td>
+        <td class="col-name">Total Motor Gasoline Stocks</td>
+        <td class="id">WGTSTUS1</td>
+        <td>kbbl</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Demand-side proxy. Big gasoline draw → bullish crude → lifts Brent that Petronas/MISC track</td></tr>
+
+    <tr><td class="num">4</td>
+        <td class="col-name">Distillate Fuel Stocks</td>
+        <td class="id">WDISTUS1</td>
+        <td>kbbl</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Diesel/jet proxy. Asian refiners (Pengerang, Melaka) export distillate; tight US stocks tighten Singapore gasoil</td></tr>
+
+    <tr><td class="num">5</td>
+        <td class="col-name">Refinery Crude Inputs (Runs)</td>
+        <td class="id">WCRRIUS2</td>
+        <td>kb/d</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Demand for crude. High runs = bullish crude. Trader signal for refining margin direction</td></tr>
+
+    <tr><td class="num">6</td>
+        <td class="col-name">Refinery Utilization %</td>
+        <td class="id">WPULEUS3</td>
+        <td>%</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">>92% = full demand mode (bullish), <85% = turnaround season (bearish near-term)</td></tr>
+
+    <tr><td class="num">7</td>
+        <td class="col-name">US Crude Production</td>
+        <td class="id">WCRFPUS2</td>
+        <td>kb/d</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Supply side. Shale output trend vs OPEC+ cuts — central to Brent direction</td></tr>
+
+    <tr><td class="num">8</td>
+        <td class="col-name">Crude Imports</td>
+        <td class="id">WCRIMUS2</td>
+        <td>kb/d</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Falling imports = US self-sufficiency rising = pressure on Brent–WTI spread</td></tr>
+
+    <tr><td class="num">9</td>
+        <td class="col-name">Crude Exports</td>
+        <td class="id">WCREXUS2</td>
+        <td>kb/d</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">US exports to Asia compete with Tapis/Bach Ho. Affects Asian crude differentials</td></tr>
+
+    <tr><td class="num">10</td>
+        <td class="col-name">Gasoline Product Supplied (demand)</td>
+        <td class="id">WGFUPUS2</td>
+        <td>kb/d</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Cleanest weekly US demand reading. Strong demand = bullish global crude</td></tr>
+
+    <tr><td class="num">11</td>
+        <td class="col-name">Strategic Petroleum Reserve</td>
+        <td class="id">WCSSTUS1</td>
+        <td>kbbl</td>
+        <td class="freq">Weekly · Wed 10:30 ET</td>
+        <td class="why">Policy releases distort the headline crude number. Watched separately post-2022</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="section-label">◈ HOW TO PULL EIA DATA — FREE, NO PAYWALL</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>METHOD</th>
+      <th>ENDPOINT</th>
+      <th>AUTH</th>
+      <th>EXAMPLE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="col-name">EIA API v2 (JSON)</td>
+      <td class="endpoint">https://api.eia.gov/v2/petroleum/stoc/wstk/data/</td>
+      <td><span class="badge badge-eia">FREE KEY</span><br>register at<br>eia.gov/opendata</td>
+      <td><pre>GET https://api.eia.gov/v2/petroleum/stoc/wstk/data/
+  ?frequency=weekly
+  &data[0]=value
+  &facets[series][]=WCESTUS1
+  &sort[0][column]=period&sort[0][direction]=desc
+  &api_key=YOUR_KEY&length=52</pre></td>
+    </tr>
+    <tr>
+      <td class="col-name">WPSR direct CSV</td>
+      <td class="endpoint">https://ir.eia.gov/wpsr/table1.csv … table14.csv</td>
+      <td><span class="badge badge-eia">NO AUTH</span></td>
+      <td><pre># Table 1 = headline summary
+curl https://ir.eia.gov/wpsr/table1.csv
+# Table 4 = stocks (crude, gasoline, distillate, Cushing)
+curl https://ir.eia.gov/wpsr/table4.csv</pre></td>
+    </tr>
+    <tr>
+      <td class="col-name">Bulk ZIP (full history)</td>
+      <td class="endpoint">https://www.eia.gov/opendata/bulk/PET.zip</td>
+      <td><span class="badge badge-eia">NO AUTH</span></td>
+      <td><pre># 150 MB JSON-lines, every petroleum series ever
+# Updated twice daily
+curl -O https://www.eia.gov/opendata/bulk/PET.zip
+unzip PET.zip   # → PET.txt</pre></td>
+    </tr>
+    <tr>
+      <td class="col-name">FRED mirror (faster)</td>
+      <td class="endpoint">https://api.stlouisfed.org/fred/series/observations</td>
+      <td><span class="badge badge-eia">FREE KEY</span><br>120 req/min</td>
+      <td><pre>GET https://api.stlouisfed.org/fred/series/observations
+  ?series_id=WCESTUS1
+  &api_key=YOUR_KEY&file_type=json</pre></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════ API ═══════════════════════════ -->
+<div class="section-label">◈ API — WEEKLY STATISTICAL BULLETIN (paywalled, but headline numbers leak free)</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>COLUMN / INDICATOR</th>
+      <th>UNIT</th>
+      <th>RELEASE</th>
+      <th>WHY MALAYSIAN TRADERS WATCH IT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="col-name">API Crude Stock Change</td><td>Δ kbbl</td>
+        <td class="freq">Tue 4:30 PM ET<br>= Wed 5:30 AM MYT</td>
+        <td class="why">First read on US inventories — 18 hours BEFORE EIA. Drives Asian session Brent on Wed morning KL</td></tr>
+    <tr><td class="num">2</td><td class="col-name">API Cushing Stock Change</td><td>Δ kbbl</td>
+        <td class="freq">Tue 4:30 PM ET</td>
+        <td class="why">WTI hub leak — sets expectation for next-day EIA Cushing print, biggest Brent–WTI spread driver</td></tr>
+    <tr><td class="num">3</td><td class="col-name">API Gasoline Stock Change</td><td>Δ kbbl</td>
+        <td class="freq">Tue 4:30 PM ET</td>
+        <td class="why">Same role as EIA gasoline but earlier. Big surprise = overnight gap on Brent at SGX/ICE</td></tr>
+    <tr><td class="num">4</td><td class="col-name">API Distillate Stock Change</td><td>Δ kbbl</td>
+        <td class="freq">Tue 4:30 PM ET</td>
+        <td class="why">Drives Singapore gasoil swap that Petronas trades around</td></tr>
+    <tr><td class="num">5</td><td class="col-name">API Refinery Run Rate</td><td>kb/d</td>
+        <td class="freq">Tue 4:30 PM ET</td>
+        <td class="why">Demand check 18h ahead of EIA</td></tr>
+    <tr><td class="num">6</td><td class="col-name">API Crude Imports</td><td>kb/d</td>
+        <td class="freq">Tue 4:30 PM ET</td>
+        <td class="why">Lead indicator for Asian export competition vs Malaysian crude</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="section-label">◈ HOW TO ACCESS API WSB</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>METHOD</th>
+      <th>ACCESS</th>
+      <th>COST</th>
+      <th>NOTE</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="col-name">Official — full bulletin</td>
+      <td class="endpoint">api.org/energy-insights/statistics/wsb</td>
+      <td><span class="badge badge-api">PAID</span></td>
+      <td>Sold only via LSEG (Refinitiv Eikon) and ICE Connect — no public API</td>
+    </tr>
+    <tr>
+      <td class="col-name">ICE Developer Portal</td>
+      <td class="endpoint">developer.ice.com → American Petroleum Institute</td>
+      <td><span class="badge badge-api">PAID</span></td>
+      <td>Programmatic access via ICE bulk file / API service. KL desks usually subscribe via ICE</td>
+    </tr>
+    <tr>
+      <td class="col-name">LSEG Workspace / Eikon</td>
+      <td class="endpoint">lseg.com → US API Weekly Statistical Bulletin</td>
+      <td><span class="badge badge-api">PAID</span></td>
+      <td>Most common method on Malaysian trading floors (Petronas, CIMB, Maybank IB)</td>
+    </tr>
+    <tr>
+      <td class="col-name">Free — headline numbers only</td>
+      <td class="endpoint">investing.com/economic-calendar/api-weekly-crude-stock-656<br>
+                            tradingeconomics.com/united-states/api-crude-oil-stock-change<br>
+                            macromicro.me/series/3387/us-api-crude-oil-stock</td>
+      <td><span class="badge badge-eia">FREE</span></td>
+      <td>The 4–5 headline change numbers (crude, Cushing, gasoline, distillate) are republished free within minutes of release. Most retail KL traders use this</td>
+    </tr>
+    <tr>
+      <td class="col-name">Bloomberg Terminal</td>
+      <td class="endpoint">{API} {GO} or DOEAUSCD Index</td>
+      <td><span class="badge badge-api">PAID</span></td>
+      <td>Standard on institutional desks</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<!-- ═══════════════════════════ Prices ═══════════════════════════ -->
+<div class="section-label">◈ COMPANION PRICE BENCHMARKS — TRADED AGAINST INVENTORY DATA</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>BENCHMARK</th>
+      <th>FREE SOURCE</th>
+      <th>ID / TICKER</th>
+      <th>WHY KL TRADERS USE IT</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="col-name">Brent spot (Dated)</td>
+      <td>EIA <code>pri/spt</code> · FRED <code>DCOILBRENTEU</code></td>
+      <td class="id">RBRTE</td>
+      <td class="why"><span class="badge badge-px">PRIMARY</span> Asian crudes price off Brent (Tapis, Bach Ho, Minas, Murban)</td>
+    </tr>
+    <tr>
+      <td class="col-name">WTI Cushing spot</td>
+      <td>EIA <code>pri/spt</code> · FRED <code>DCOILWTICO</code></td>
+      <td class="id">RWTC</td>
+      <td class="why">Watched as Brent–WTI arb signal; drives US-to-Asia VLCC flows</td>
+    </tr>
+    <tr>
+      <td class="col-name">Brent futures (ICE)</td>
+      <td>Yahoo Finance <code>BZ=F</code></td>
+      <td class="id">BZ=F</td>
+      <td class="why">Front-month futures — most KL desks trade BCO/Brent CFD vs this</td>
+    </tr>
+    <tr>
+      <td class="col-name">WTI futures (NYMEX)</td>
+      <td>Yahoo Finance <code>CL=F</code></td>
+      <td class="id">CL=F</td>
+      <td class="why">Reaction tape during EIA release window</td>
+    </tr>
+    <tr>
+      <td class="col-name">Tapis (Malaysian crude)</td>
+      <td>Argus / Platts (paid) — proxy free via Brent + premium</td>
+      <td class="id">PCAAT00</td>
+      <td class="why">Petronas's main export grade; trades at Brent + differential</td>
+    </tr>
+    <tr>
+      <td class="col-name">Dubai crude</td>
+      <td>World Bank Pink Sheet <code>CRUDE_DUBAI</code></td>
+      <td class="id">CRUDE_DUBAI</td>
+      <td class="why">Asian sour benchmark — Saudi/Iraqi grades to Petronas refineries price off Dubai</td>
+    </tr>
+    <tr>
+      <td class="col-name">OVX (oil vol index)</td>
+      <td>Yahoo Finance <code>^OVX</code></td>
+      <td class="id">^OVX</td>
+      <td class="why">CBOE crude implied vol — gauge for option pricing on EIA release days</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="footer">
+  <div>◆ KL OIL DESK &nbsp;|&nbsp; <strong>EIA + API REFERENCE</strong> &nbsp;|&nbsp; All times confirmed via web search 2026-04-27</div>
+  <div>EIA = free public API · API = paid (LSEG/ICE/Bloomberg) · Headline numbers leak free</div>
+</div>
+
+</body>
+</html>
