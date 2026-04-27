@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bloomberg Terminal — API Data Source Reference</title>
+
+<style>
+  :root {
+    --bg:        #050505;
+    --bg2:       #0a0a0a;
+    --bg3:       #111;
+    --border:    #1e1e1e;
+    --orange:    #ff6600;
+    --amber:     #ffaa00;
+    --cyan:      #00d4ff;
+    --green:     #00ff88;
+    --red:       #ff3355;
+    --purple:    #aa66ff;
+    --white:     #e8e8e8;
+    --muted:     #444;
+    --mono:      'Courier New', Courier, monospace;
+    --display:   'Trebuchet MS', 'Lucida Sans Unicode', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--mono);
+    font-size: 11px;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  /* ── header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--orange);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+  }
+  .logo {
+    font-family: var(--display);
+    font-size: 18px;
+    color: var(--orange);
+    letter-spacing: 3px;
+  }
+  .logo span { color: var(--amber); }
+  .header-meta {
+    margin-left: auto;
+    text-align: right;
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .header-meta strong { color: var(--cyan); }
+
+  /* ── section label ── */
+  .section-label {
+    font-family: var(--display);
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--orange);
+    border-left: 2px solid var(--orange);
+    padding-left: 8px;
+    margin: 24px 0 10px;
+  }
+
+  /* ── table wrapper ── */
+  .tbl-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10.5px;
+  }
+
+  thead tr {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--orange);
+  }
+  thead th {
+    padding: 8px 10px;
+    text-align: left;
+    font-family: var(--display);
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: var(--orange);
+    white-space: nowrap;
+    border-right: 1px solid var(--border);
+  }
+  thead th:last-child { border-right: none; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: rgba(255,102,0,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td {
+    padding: 7px 10px;
+    vertical-align: top;
+    border-right: 1px solid var(--border);
+    line-height: 1.55;
+  }
+  td:last-child { border-right: none; }
+
+  /* ── colour tokens ── */
+  .api-name   { color: var(--amber);  font-weight: bold; letter-spacing: 0.5px; }
+  .endpoint   { color: var(--cyan);   font-size: 9.5px; word-break: break-all; }
+  .dtype      { color: var(--green);  }
+  .timing     { color: var(--white);  }
+  .shape      { color: var(--purple); font-size: 9.5px; }
+  .connects   { color: #aaa; }
+
+  .badge {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-size: 8px;
+    font-family: var(--display);
+    letter-spacing: 0.8px;
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+  .badge-live   { background: rgba(0,255,136,0.12); color: var(--green);  border: 1px solid rgba(0,255,136,0.3); }
+  .badge-poll   { background: rgba(255,170,0,0.10); color: var(--amber);  border: 1px solid rgba(255,170,0,0.3); }
+  .badge-static { background: rgba(170,102,255,0.10);color: var(--purple);border: 1px solid rgba(170,102,255,0.3); }
+  .badge-tile   { background: rgba(0,212,255,0.10); color: var(--cyan);   border: 1px solid rgba(0,212,255,0.3); }
+
+  /* ── summary chips ── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .chip {
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+  .chip span { color: var(--amber); font-weight: bold; }
+
+  /* ── footer ── */
+  .footer {
+    margin-top: 28px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 9px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer strong { color: var(--orange); }
+
+  /* ── scanline effect ── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      rgba(0,0,0,0.04) 2px,
+      rgba(0,0,0,0.04) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">◆ BLOOMBERG <span>TERMINAL PRO</span></div>
+  <div class="header-meta">
+    <strong>API DATA SOURCE REFERENCE</strong><br>
+    File: bloomberg-terminal-live.html &nbsp;|&nbsp; v4.12.6<br>
+    Extracted: <strong>2026-04-26</strong>
+  </div>
+</div>
+
+<!-- summary chips -->
+<div class="chips">
+  <div class="chip">APIs IDENTIFIED <span>4</span></div>
+  <div class="chip">ENDPOINTS <span>9</span></div>
+  <div class="chip">DATA DOMAINS <span>7</span></div>
+  <div class="chip">FAST POLL (60 s) <span>4 sources</span></div>
+  <div class="chip">SLOW POLL (10 min) <span>2 sources</span></div>
+  <div class="chip">AUTH REQUIRED <span>None (public)</span></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="section-label">◈ LIVE DATA APIS — FINANCIAL</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>API / SOURCE</th>
+      <th>ENDPOINT</th>
+      <th>DATA TYPE</th>
+      <th>TIME IDENTITY / INTERVAL</th>
+      <th>RESPONSE SHAPE</th>
+      <th>CONNECTS WITH (TERMINAL PANEL)</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="muted">1</td>
+      <td>
+        <div class="api-name">Yahoo Finance</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">query1.finance.yahoo.com</div>
+        <div><span class="badge badge-live">LIVE</span></div>
+      </td>
+      <td class="endpoint">
+        /v8/finance/chart/{symbol}<br>
+        <span style="color:#555">?range={r}&interval={i}&events=div,splits</span>
+      </td>
+      <td class="dtype">
+        OHLCV price bars<br>
+        Quote metadata<br>
+        Dividends / splits events
+      </td>
+      <td class="timing">
+        <strong>Intraday:</strong> 5 m bars (equities, FX, futures)<br>
+        <strong>FX pairs:</strong> 1 h bars<br>
+        <strong>Refresh:</strong> every 60 s via <code>refreshFast</code><br>
+        <strong>Ranges:</strong> 1D, 5D, 1M, 3M, 1Y, 5Y
+      </td>
+      <td class="shape">
+        JSON → <code>chart.result[0]</code><br>
+        <code>.timestamp[]</code> — Unix epoch array<br>
+        <code>.indicators.quote[0]</code><br>
+        &nbsp;&nbsp;{open[], high[], low[], close[], volume[]}<br>
+        <code>.meta</code> — {regularMarketPrice, currency, exchangeName, …}
+      </td>
+      <td class="connects">
+        ◈ Watchlist (equities)<br>
+        ◈ Indices (SPX, NDX, DJIA, VIX, DXY, 10Y, WTI, GOLD)<br>
+        ◈ FX Spot Rates / FX Heat Map / Cross Rates<br>
+        ◈ Price Chart (all timeframes, all chart types)<br>
+        ◈ Ticker Strip (top-of-screen scroll)<br>
+        ◈ Satellite map equity pop-up quotes<br>
+        ◈ Top Markets bar (9 instruments)<br>
+        ◈ Portfolio live pricing<br>
+        ◈ Technical Indicators (RSI, MACD, SMA, EMA compute from bars)
+      </td>
+    </tr>
+
+    <tr>
+      <td class="muted">2</td>
+      <td>
+        <div class="api-name">Binance</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">api.binance.com</div>
+        <div><span class="badge badge-live">LIVE</span></div>
+      </td>
+      <td class="endpoint">
+        /api/v3/ticker/24hr<br>
+        <span style="color:#555">?symbols=[…]</span>
+      </td>
+      <td class="dtype">
+        24 h rolling ticker<br>
+        Last price, % change<br>
+        Quote volume (USD)<br>
+        Proxy market cap
+      </td>
+      <td class="timing">
+        <strong>Window:</strong> rolling 24 h snapshot<br>
+        <strong>Refresh:</strong> every 60 s via <code>refreshFast</code><br>
+        <strong>Symbols:</strong> batch (all crypto at once)
+      </td>
+      <td class="shape">
+        JSON → Array of objects<br>
+        [{symbol, lastPrice, priceChangePercent, quoteVolume, …}]<br>
+        Keyed by <code>symbol</code> (e.g. "BTCUSDT")<br>
+        Mapped to internal <code>DATA.crypto[]</code>
+      </td>
+      <td class="connects">
+        ◈ Crypto Markets page (price cards)<br>
+        ◈ Crypto total market-cap estimate<br>
+        ◈ BTC dominance display<br>
+        ◈ Ticker strip (crypto section)<br>
+        ◈ Portfolio live pricing (crypto holdings)<br>
+        ◈ Alert evaluation (price threshold checks)
+      </td>
+    </tr>
+
+    <tr>
+      <td class="muted">3</td>
+      <td>
+        <div class="api-name">Alpha Vantage</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">alphavantage.co — key: "demo"</div>
+        <div><span class="badge badge-poll">SLOW POLL</span></div>
+      </td>
+      <td class="endpoint">
+        /query?function=TREASURY_YIELD<br>
+        &nbsp;&nbsp;&amp;maturity={tenor}&amp;interval=monthly<br><br>
+        /query?function=REAL_GDP<br>
+        /query?function=INFLATION<br>
+        /query?function=UNEMPLOYMENT<br>
+        /query?function=NONFARM_PAYROLL<br>
+        /query?function=RETAIL_SALES<br><br>
+        /query?function=NEWS_SENTIMENT<br>
+        &nbsp;&nbsp;&amp;topics=financial_markets,technology,earnings
+      </td>
+      <td class="dtype">
+        Treasury yield curve (5 tenors)<br>
+        Macro indicators (5 series)<br>
+        News sentiment feed
+      </td>
+      <td class="timing">
+        <strong>Bonds:</strong> monthly cadence; cached 10 min<br>
+        <strong>Macro:</strong> monthly/quarterly release; cached 10 min<br>
+        <strong>News:</strong> latest 12 articles; cached 15 min<br>
+        <strong>Stagger:</strong> 250 ms sleep between bond requests<br>
+        <strong>Guard:</strong> skip refresh if cache &lt; TTL
+      </td>
+      <td class="shape">
+        JSON → <code>{data: [{date, value}, …]}</code><br>
+        Bond: latest + prev entry → yield &amp; Δ<br>
+        Macro: latest numeric value + label<br>
+        News: <code>{feed: [{title, summary, source, url, time_published, topics[]}]}</code> → slice(0,12)
+      </td>
+      <td class="connects">
+        ◈ Yield Curve (canvas chart + table, 5 tenors: 3M→30Y)<br>
+        ◈ Govt Bonds panel<br>
+        ◈ Fixed Income page (FI tab)<br>
+        ◈ Economic Indicators panel<br>
+        ◈ Macro page (ECOS tab): GDP, CPI, Unemployment, Payrolls, Retail Sales<br>
+        ◈ Central Banks section<br>
+        ◈ Econ Calendar events<br>
+        ◈ News Headlines / Article Reader<br>
+        ◈ News Feed (filter by category)
+      </td>
+    </tr>
+
+    <tr>
+      <td class="muted">4</td>
+      <td>
+        <div class="api-name">Deribit</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">deribit.com — public, no key</div>
+        <div><span class="badge badge-live">LIVE</span></div>
+      </td>
+      <td class="endpoint">
+        /api/v2/public/get_order_book<br>
+        &nbsp;&nbsp;?instrument_name=BTC-PERPETUAL&amp;depth=5<br><br>
+        /api/v2/public/get_last_trades_by_instrument<br>
+        &nbsp;&nbsp;?instrument_name=BTC-PERPETUAL&amp;count=25<br><br>
+        /api/v2/public/get_book_summary_by_currency<br>
+        &nbsp;&nbsp;?currency=BTC&amp;kind=option
+      </td>
+      <td class="dtype">
+        Derivatives order book (L2)<br>
+        Time &amp; Sales (last trades)<br>
+        BTC options chain (all expiries)<br>
+        Implied volatility surface
+      </td>
+      <td class="timing">
+        <strong>Refresh:</strong> every 60 s via <code>refreshFast</code><br>
+        <strong>Order book:</strong> depth=5 (5 bid/ask levels)<br>
+        <strong>Trades:</strong> last 25 fills<br>
+        <strong>Options:</strong> all live BTC option contracts (parallel fetch)
+      </td>
+      <td class="shape">
+        Order book: <code>{result:{bids:[[px,sz]…], asks:[[px,sz]…]}}</code><br>
+        Trades: <code>{result:{trades:[{price,amount,direction,timestamp}…]}}</code><br>
+        Options: <code>{result:[{instrument_name, bid_price, ask_price, open_interest, mark_iv}…]}</code><br>
+        Parsed: strike, expiry, C/P extracted via regex on instrument name
+      </td>
+      <td class="connects">
+        ◈ Order Book panel (bid/ask ladder)<br>
+        ◈ Time &amp; Sales (live trade tape)<br>
+        ◈ Options Chain — AAPL panel (BTC options proxy)<br>
+        ◈ Vol Surface panel (IV by strike/expiry)<br>
+        ◈ Analytics (avg call IV, avg put IV, nearest expiry snapshot)<br>
+        ◈ Derivatives page (DRVS tab)
+      </td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="section-label">◈ MAPPING & TILE APIS — SATELLITE / GEOSPATIAL</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>API / SOURCE</th>
+      <th>ENDPOINT</th>
+      <th>DATA TYPE</th>
+      <th>TIME IDENTITY / INTERVAL</th>
+      <th>RESPONSE SHAPE</th>
+      <th>CONNECTS WITH (TERMINAL PANEL)</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <tr>
+      <td class="muted">5</td>
+      <td>
+        <div class="api-name">ArcGIS / Esri</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">server.arcgisonline.com</div>
+        <div><span class="badge badge-static">STATIC</span></div>
+      </td>
+      <td class="endpoint">
+        /ArcGIS/rest/services/World_Imagery/MapServer/export<br>
+        <span style="color:#555">?bbox=-180,-90,180,90&bboxSR=4326&size=1400,850&format=jpg</span>
+      </td>
+      <td class="dtype">Satellite imagery (JPEG tile)</td>
+      <td class="timing">
+        <strong>Mode:</strong> on-demand (map open event)<br>
+        <strong>Cached:</strong> browser cache, no auto-refresh<br>
+        <strong>Resolution:</strong> 1400×850 px world view
+      </td>
+      <td class="shape">Binary JPEG image → rendered as &lt;img&gt; background in satellite modal</td>
+      <td class="connects">◈ Satellite Map (SAT MAP button, SATELLITE layer mode)</td>
+    </tr>
+
+    <tr>
+      <td class="muted">6</td>
+      <td>
+        <div class="api-name">OpenStreetMap</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">tile.openstreetmap.org</div>
+        <div><span class="badge badge-tile">TILE</span></div>
+      </td>
+      <td class="endpoint">/2/1/1.png (z/x/y tile scheme)</td>
+      <td class="dtype">Vector road/street map tile (PNG)</td>
+      <td class="timing">
+        <strong>Mode:</strong> on-demand per zoom/pan<br>
+        <strong>Cached:</strong> browser tile cache
+      </td>
+      <td class="shape">PNG image tile → rendered as &lt;img&gt; layer</td>
+      <td class="connects">◈ Satellite Map (STREET MAP layer mode)</td>
+    </tr>
+
+    <tr>
+      <td class="muted">7</td>
+      <td>
+        <div class="api-name">Stamen Tiles</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">stamen-tiles.a.ssl.fastly.net</div>
+        <div><span class="badge badge-tile">TILE</span></div>
+      </td>
+      <td class="endpoint">/terrain-background/2/1/1.jpg</td>
+      <td class="dtype">Terrain / topography tile (JPEG)</td>
+      <td class="timing">
+        <strong>Mode:</strong> on-demand<br>
+        <strong>Cached:</strong> browser tile cache
+      </td>
+      <td class="shape">JPEG image tile → rendered as &lt;img&gt; layer</td>
+      <td class="connects">◈ Satellite Map (TERRAIN layer mode)</td>
+    </tr>
+
+    <tr>
+      <td class="muted">8</td>
+      <td>
+        <div class="api-name">NASA Earth Observatory</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">eoimages.gsfc.nasa.gov</div>
+        <div><span class="badge badge-static">STATIC</span></div>
+      </td>
+      <td class="endpoint">/images/imagerecords/79000/79765/<br>dnb_land_ocean_ice.2012.3600x1800.jpg</td>
+      <td class="dtype">NASA Blue Marble night-lights composite (JPEG)</td>
+      <td class="timing">
+        <strong>Mode:</strong> static image (2012 composite)<br>
+        <strong>No refresh</strong> — historical dataset
+      </td>
+      <td class="shape">3600×1800 px JPEG → rendered as &lt;img&gt; in modal</td>
+      <td class="connects">◈ Satellite Map (NIGHT LIGHTS layer mode)</td>
+    </tr>
+
+    <tr>
+      <td class="muted">9</td>
+      <td>
+        <div class="api-name">Wikimedia Commons</div>
+        <div style="color:#555;font-size:9px;margin-top:2px;">upload.wikimedia.org</div>
+        <div><span class="badge badge-static">STATIC</span></div>
+      </td>
+      <td class="endpoint">/wikipedia/commons/8/80/World_map_WSFI.svg</td>
+      <td class="dtype">World economic heat-map (SVG vector)</td>
+      <td class="timing">
+        <strong>Mode:</strong> static SVG (no refresh)<br>
+        <strong>Historical index</strong> dataset
+      </td>
+      <td class="shape">SVG document → rendered as &lt;img&gt; overlay in modal</td>
+      <td class="connects">◈ Satellite Map (ECONOMIC HEAT layer mode)</td>
+    </tr>
+
+  </tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="section-label">◈ REFRESH CADENCE SUMMARY</div>
+<div class="tbl-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>FUNCTION</th>
+      <th>TRIGGER</th>
+      <th>INTERVAL</th>
+      <th>APIS CALLED</th>
+      <th>PANELS UPDATED</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="api-name">refreshAll()</td>
+      <td class="timing">Page load (bootstrap)</td>
+      <td class="dtype">Once on start</td>
+      <td class="connects">Yahoo, Binance, Deribit, Alpha Vantage (all)</td>
+      <td class="connects">All panels + ticker + alerts</td>
+    </tr>
+    <tr>
+      <td class="api-name">refreshFast()</td>
+      <td class="timing">setInterval</td>
+      <td class="dtype" style="color:var(--orange)">Every 60 s</td>
+      <td class="connects">Yahoo (stocks + FX), Binance (crypto), Deribit (derivatives), Yahoo (chart)</td>
+      <td class="connects">Watchlist, Indices, Ticker, FX, Crypto, Order Book, Chart, Portfolio, Alerts</td>
+    </tr>
+    <tr>
+      <td class="api-name">refreshBonds()</td>
+      <td class="timing">Inside refreshAll; guarded</td>
+      <td class="dtype" style="color:var(--purple)">10 min cache TTL</td>
+      <td class="connects">Alpha Vantage — TREASURY_YIELD × 5 tenors</td>
+      <td class="connects">Yield Curve, Govt Bonds, FI page</td>
+    </tr>
+    <tr>
+      <td class="api-name">refreshMacro()</td>
+      <td class="timing">Inside refreshAll; guarded</td>
+      <td class="dtype" style="color:var(--purple)">10 min cache TTL</td>
+      <td class="connects">Alpha Vantage — REAL_GDP, INFLATION, UNEMPLOYMENT, NONFARM_PAYROLL, RETAIL_SALES</td>
+      <td class="connects">Economic Indicators, Macro page, Central Banks</td>
+    </tr>
+    <tr>
+      <td class="api-name">refreshNews()</td>
+      <td class="timing">Inside refreshAll; guarded</td>
+      <td class="dtype" style="color:var(--purple)">15 min cache TTL</td>
+      <td class="connects">Alpha Vantage — NEWS_SENTIMENT</td>
+      <td class="connects">News Feed, Article Reader, News Headlines</td>
+    </tr>
+    <tr>
+      <td class="api-name">Map layers</td>
+      <td class="timing">User opens satellite modal</td>
+      <td class="dtype">On demand</td>
+      <td class="connects">ArcGIS / OSM / Stamen / NASA / Wikimedia</td>
+      <td class="connects">Satellite Map modal (5 layer modes)</td>
+    </tr>
+    <tr>
+      <td class="api-name">updateClock()</td>
+      <td class="timing">setInterval</td>
+      <td class="dtype" style="color:var(--green)">Every 1 s</td>
+      <td class="connects">No external API — system clock only</td>
+      <td class="connects">Header clock (EST display)</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="footer">
+  <div>◆ BLOOMBERG TERMINAL PRO &nbsp;|&nbsp; <strong>API REFERENCE</strong> &nbsp;|&nbsp; Extracted from bloomberg-terminal-live.html v4.12.6</div>
+  <div>All APIs are <strong>public / no-auth</strong> &nbsp;·&nbsp; Alpha Vantage key = "demo" (rate-limited) &nbsp;·&nbsp; 2026-04-26</div>
+</div>
+
+</body>
+</html>
